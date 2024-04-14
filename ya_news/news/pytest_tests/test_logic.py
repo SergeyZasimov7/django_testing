@@ -59,7 +59,7 @@ def test_user_cant_delete_comment_of_another_user(
     news,
     user,
     not_author
-     ):
+):
     comment = Comment.objects.create(
         text='Другой комментарий',
         news=news,
@@ -89,17 +89,17 @@ def test_author_can_edit_comment(auth_client, news, user):
 @pytest.mark.django_db
 def test_user_cant_edit_comment_of_another_user(
     reader_client, news, form_data, not_author
-     ):
+):
     comment = Comment.objects.create(
         author=not_author,
         news=news,
         text="Оригинальный текст комментария"
-        )
+    )
     assert Comment.objects.exists()
     response = reader_client.post(
         reverse('news:edit', kwargs={'pk': comment.pk}),
         data=form_data
-        )
+    )
     assert response.status_code == HTTPStatus.NOT_FOUND
     comment = Comment.objects.first()
     if comment:

@@ -10,7 +10,7 @@ def test_availability_for_comment_edit_and_delete(
     user,
     not_author,
     comment
-     ):
+):
     users = [user, not_author]
     statuses = [HTTPStatus.OK, HTTPStatus.NOT_FOUND]
     for user, status in zip(users, statuses):

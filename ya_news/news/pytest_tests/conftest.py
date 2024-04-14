@@ -1,9 +1,7 @@
 from datetime import datetime, timedelta
-from http import HTTPStatus
 
 import pytest
 from django.conf import settings
-from django.urls import reverse
 from django.test import Client
 
 from news.models import News, Comment
