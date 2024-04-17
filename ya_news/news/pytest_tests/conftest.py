@@ -2,8 +2,10 @@ from datetime import datetime, timedelta
 
 import pytest
 from django.conf import settings
+from django.urls import reverse
 from django.test import Client
 
+from news.forms import BAD_WORDS
 from news.models import News, Comment
 
 
@@ -42,19 +44,63 @@ def comment(news, user):
 
 
 @pytest.fixture
-def create_news_objects():
+def news_objects():
     today = datetime.today()
-    all_news = [
+    News.objects.bulk_create([
         News(
             title=f'Новость {index}',
             text='Просто текст.',
             date=today - timedelta(days=index)
         )
         for index in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
-    ]
-    News.objects.bulk_create(all_news)
+    ])
 
 
 @pytest.fixture
-def form_data():
-    return {'text': 'Текст комментария'}
+def comment_edit_url(comment):
+    return reverse('news:edit', kwargs={'pk': comment.pk})
+
+
+@pytest.fixture
+def comment_delete_url(comment):
+    return reverse('news:delete', kwargs={'pk': comment.pk})
+
+
+@pytest.fixture
+def login_url():
+    return reverse('users:login')
+
+
+@pytest.fixture
+def home_url():
+    return reverse('news:home')
+
+
+@pytest.fixture
+def detail_url(news):
+    return reverse('news:detail', args=(news.id,))
+
+
+@pytest.fixture
+def logout_url():
+    return reverse('users:logout')
+
+
+@pytest.fixture
+def signup_url():
+    return reverse('users:signup')
+
+
+@pytest.fixture
+def bad_words_data():
+    return {'text': f'Какой-то текст, {BAD_WORDS[0]}, еще текст'}
+
+
+@pytest.fixture
+def created_comment(news, user):
+    comment = Comment.objects.create(
+        text='Текст комментария',
+        news=news,
+        author=user
+    )
+    return comment
