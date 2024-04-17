@@ -27,8 +27,10 @@ def test_comments_order(news, client, detail_url):
     response = client.get(detail_url)
     all_comments = response.context['news'].comment_set.all()
     all_timestamps = [comment.created for comment in all_comments]
-    assert all(all_timestamps[i] >= all_timestamps[i+1]
-               for i in range(len(all_timestamps)-1))
+    assert all(
+        all_timestamps[i] >= all_timestamps[i + 1]
+        for i in range(len(all_timestamps) - 1)
+    )
 
 
 def test_anonymous_client_has_no_form(news, client, detail_url):
