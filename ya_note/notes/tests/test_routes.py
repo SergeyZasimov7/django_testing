@@ -7,8 +7,8 @@ from .test_urls import (
 )
 from .test_class import BaseTestCase
 
-class TestContent(BaseTestCase):
 
+class TestContent(BaseTestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData(create_note=True)

@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 import pytest
 
+from news.forms import WARNING
 from news.models import Comment
 
 COMMENT_FORM_DATA = {'text': 'Текст комментария'}
@@ -30,6 +31,7 @@ def test_user_can_create_comment(auth_client, news, user, detail_url):
 def test_user_cant_use_bad_words(auth_client, detail_url, bad_words_data):
     response = auth_client.post(detail_url, data=bad_words_data)
     assert Comment.objects.count() == 0
+    assert response.context['form'].errors['text'][0] == WARNING
 
 
 def test_author_can_delete_comment(auth_client, comment_delete_url):
