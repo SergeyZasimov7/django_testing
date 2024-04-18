@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 
 from notes.forms import WARNING
 from notes.models import Note
-from .test_class import (
+from .test_cases import (
     BaseTestCase, ADD_URL, SUCCESS_URL, NOTE_DELETE_URL, NOTE_EDIT_URL
 )
 
@@ -18,7 +18,7 @@ class TestContent(BaseTestCase):
         return {**self.form_data, **kwargs}
 
     def test_not_unique_slug(self):
-        initial_note_count = Note.objects.count()
+        initial_note_count = list(Note.objects.all())
         response = self.author_client.post(ADD_URL, data={
             **self.form_data,
             'slug': self.note.slug
@@ -29,18 +29,21 @@ class TestContent(BaseTestCase):
             'slug',
             errors=(self.note.slug + WARNING)
         )
-        self.assertEqual(initial_note_count, Note.objects.count())
+        self.assertEqual(initial_note_count, list(Note.objects.all()))
 
     def test_create_note_with_full_form_data(self):
+        Note.objects.all().delete()
         initial_note_count = Note.objects.count()
         response = self.author_client.post(ADD_URL, data=self.form_data)
         self.assertRedirects(response, SUCCESS_URL)
         self.assertEqual(Note.objects.count(), initial_note_count + 1)
-        new_note = Note.objects.filter(slug=self.form_data['slug']).first()
-        self.assertIsNotNone(new_note)
-        if new_note:
-            self.assertEqual(new_note.title, self.form_data['title'])
-            self.assertEqual(new_note.text, self.form_data['text'])
+        new_note = Note.objects.filter(
+            slug=self.form_data['slug']
+        ).first()if 'slug' in self.form_data else None
+        self.assertEqual(new_note.title, self.form_data['title'])
+        self.assertEqual(new_note.text, self.form_data['text'])
+        self.assertEqual(new_note.slug, self.form_data['slug'])
+        self.assertEqual(new_note.author, self.author)
 
     def test_empty_slug(self):
         Note.objects.all().delete()
@@ -51,6 +54,7 @@ class TestContent(BaseTestCase):
         self.assertEqual(new_note.title, self.form_data['title'])
         self.assertEqual(new_note.text, self.form_data['text'])
         self.assertEqual(new_note.slug, self.form_data['slug'])
+        self.assertEqual(new_note.author, self.author)
 
     def test_author_can_edit_note(self):
         form_data = self.get_updated_form_data(slug='edited-slug')
@@ -60,6 +64,7 @@ class TestContent(BaseTestCase):
         self.assertEqual(self.note.title, form_data['title'])
         self.assertEqual(self.note.text, form_data['text'])
         self.assertEqual(self.note.slug, form_data['slug'])
+        self.assertEqual(self.note.author, self.author)
 
     def test_other_user_cant_edit_note(self):
         original_title, original_text, original_slug = (
@@ -74,6 +79,7 @@ class TestContent(BaseTestCase):
         self.assertEqual(self.note.title, original_title)
         self.assertEqual(self.note.text, original_text)
         self.assertEqual(self.note.slug, original_slug)
+        self.assertEqual(self.note.author, self.author)
 
     def test_author_can_delete_note(self):
         response = self.author_client.post(NOTE_DELETE_URL)
@@ -84,3 +90,9 @@ class TestContent(BaseTestCase):
         response = self.not_author_client.post(NOTE_DELETE_URL)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         self.assertTrue(Note.objects.filter(pk=self.note.pk).exists())
+        self.assertTrue(Note.objects.filter(
+            author=self.note.author,
+            title=self.note.title,
+            text=self.note.text,
+            slug=self.note.slug
+        ).exists())

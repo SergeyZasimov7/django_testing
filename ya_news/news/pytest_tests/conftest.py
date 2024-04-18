@@ -14,7 +14,7 @@ def news():
 
 
 @pytest.fixture
-def user(django_user_model):
+def author(django_user_model):
     return django_user_model.objects.create(username='автор')
 
 
@@ -24,22 +24,22 @@ def not_author(django_user_model):
 
 
 @pytest.fixture
-def auth_client(user):
+def auth_client(author):
     client = Client()
-    client.force_login(user)
+    client.force_login(author)
     return client
 
 
 @pytest.fixture
-def reader_client(user):
+def reader_client(not_author):
     client = Client()
-    client.force_login(user)
+    client.force_login(not_author)
     return client
 
 
 @pytest.fixture
-def comment(news, user):
-    return Comment.objects.create(news=news, author=user, text='Комментарий')
+def comment(news, author):
+    return Comment.objects.create(news=news, author=author, text='Комментарий')
 
 
 @pytest.fixture
@@ -93,12 +93,6 @@ def signup_url():
 @pytest.fixture(autouse=True)
 def enable_db_access_for_all_tests(db):
     pass
-
-
-@pytest.fixture
-def reader_client_not_author(reader_client, not_author):
-    reader_client.force_login(not_author)
-    return reader_client
 
 
 @pytest.fixture

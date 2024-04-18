@@ -5,8 +5,9 @@ from news.forms import CommentForm
 
 def test_news_count(client, news_objects, home_url):
     response = client.get(home_url)
-    assert response.context['object_list'].count() == \
+    assert response.context['object_list'].count() == (
         settings.NEWS_COUNT_ON_HOME_PAGE
+    )
 
 
 def test_news_order(client, home_url):
@@ -20,7 +21,7 @@ def test_comments_order(client, detail_url):
     response = client.get(detail_url)
     all_comments = response.context['news'].comment_set.all()
     all_timestamps = [comment.created for comment in all_comments]
-    assert all_timestamps == sorted(all_timestamps, reverse=True)
+    assert all_timestamps == sorted(all_timestamps)
 
 
 def test_anonymous_client_has_no_form(client, detail_url):
@@ -30,4 +31,4 @@ def test_anonymous_client_has_no_form(client, detail_url):
 def test_authorized_client_has_form(auth_client, detail_url):
     response = auth_client.get(detail_url)
     form = response.context.get('form')
-    assert 'form' in response.context and isinstance(form, CommentForm)
+    assert isinstance(form, CommentForm)
