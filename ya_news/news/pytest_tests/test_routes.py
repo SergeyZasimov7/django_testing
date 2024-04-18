@@ -3,36 +3,17 @@ from http import HTTPStatus
 import pytest
 
 
-@pytest.fixture(autouse=True)
-def enable_db_access_for_all_tests(db):
-    pass
-
-
-def test_availability_for_comment_edit_and_delete(
-        auth_client,
-        user,
-        not_author,
-        comment_edit_url,
-        comment_delete_url
-):
-    users = [user, not_author]
-    statuses = [HTTPStatus.OK, HTTPStatus.NOT_FOUND]
-    for user, status in zip(users, statuses):
-        auth_client.force_login(user)
-        for url in (comment_edit_url, comment_delete_url):
-            assert auth_client.get(url).status_code == status
-
-
 def test_redirect_for_anonymous_client(
         client,
-        login_url,
+        comment_edit_redirect_url,
+        comment_delete_redirect_url,
         comment_edit_url,
         comment_delete_url
 ):
-    for url in (comment_edit_url, comment_delete_url):
-        redirect_url = f'{login_url}?next={url}'
-        response = client.get(url)
-        assert response.url == redirect_url
+    response_edit = client.get(comment_edit_url)
+    assert response_edit.url == comment_edit_redirect_url
+    response_delete = client.get(comment_delete_url)
+    assert response_delete.url == comment_delete_redirect_url
 
 
 @pytest.mark.parametrize(
@@ -45,8 +26,26 @@ def test_redirect_for_anonymous_client(
         ('signup_url', 'auth_client', HTTPStatus.OK),
     ]
 )
-def test_page_availability(url, client, expected_status, request):
+def test_page_availability(
+    url,
+    client,
+    expected_status,
+    request,
+    user,
+    not_author,
+    comment_edit_url,
+    comment_delete_url
+):
     url = request.getfixturevalue(url)
     client = request.getfixturevalue(client)
+
+    users = [user, not_author]
+    statuses = [HTTPStatus.OK, HTTPStatus.NOT_FOUND]
+
+    for user, status in zip(users, statuses):
+        client.force_login(user)
+        for comment_url in (comment_edit_url, comment_delete_url):
+            assert client.get(comment_url).status_code == status
+
     response = client.get(url)
     assert response.status_code == expected_status

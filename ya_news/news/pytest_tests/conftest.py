@@ -5,7 +5,6 @@ from django.conf import settings
 from django.urls import reverse
 from django.test import Client
 
-from news.forms import BAD_WORDS
 from news.models import News, Comment
 
 
@@ -46,14 +45,14 @@ def comment(news, user):
 @pytest.fixture
 def news_objects():
     today = datetime.today()
-    News.objects.bulk_create([
+    News.objects.bulk_create(
         News(
             title=f'Новость {index}',
             text='Просто текст.',
             date=today - timedelta(days=index)
         )
         for index in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
-    ])
+    )
 
 
 @pytest.fixture
@@ -91,16 +90,22 @@ def signup_url():
     return reverse('users:signup')
 
 
-@pytest.fixture
-def bad_words_data():
-    return {'text': f'Какой-то текст, {BAD_WORDS[0]}, еще текст'}
+@pytest.fixture(autouse=True)
+def enable_db_access_for_all_tests(db):
+    pass
 
 
 @pytest.fixture
-def created_comment(news, user):
-    comment = Comment.objects.create(
-        text='Текст комментария',
-        news=news,
-        author=user
-    )
-    return comment
+def reader_client_not_author(reader_client, not_author):
+    reader_client.force_login(not_author)
+    return reader_client
+
+
+@pytest.fixture
+def comment_edit_redirect_url(login_url, comment_edit_url):
+    return f'{login_url}?next={comment_edit_url}'
+
+
+@pytest.fixture
+def comment_delete_redirect_url(login_url, comment_delete_url):
+    return f'{login_url}?next={comment_delete_url}'
