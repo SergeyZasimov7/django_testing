@@ -1,8 +1,9 @@
 import pytest
 from http import HTTPStatus
 
+
 @pytest.mark.parametrize(
-    'url, client_fixture, expected_redirect, expected_status', 
+    'url, client_fixture, expected_redirect, expected_status',
     [
         (
             pytest.lazy_fixture('home_url'),
@@ -58,7 +59,8 @@ from http import HTTPStatus
             True,
             HTTPStatus.OK
         ),
-])
+    ]
+)
 def test_page_availability_and_redirect(url,
     client_fixture,
     expected_redirect,
