@@ -61,7 +61,8 @@ from http import HTTPStatus
         ),
     ]
 )
-def test_page_availability_and_redirect(url,
+def test_page_availability_and_redirect(
+    url,
     client_fixture,
     expected_redirect,
     expected_status,
