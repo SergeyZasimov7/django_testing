@@ -1,38 +1,46 @@
 from http import HTTPStatus
 
 import pytest
+from django.urls import reverse
 
 
-@pytest.mark.parametrize(
-    "url, client_fixture, expected_status",
-    [
-        ('home_url', 'auth_client', HTTPStatus.OK),
-        ('detail_url', 'auth_client', HTTPStatus.OK),
-        ('login_url', 'auth_client', HTTPStatus.OK),
-        ('logout_url', 'auth_client', HTTPStatus.OK),
-        ('signup_url', 'auth_client', HTTPStatus.OK),
-    ]
-)
-def test_page_availability(
+@pytest.mark.parametrize('url, client_fixture, expected_status', [
+    ('news:home', 'auth_client', HTTPStatus.OK),
+    ('news:detail', 'auth_client', HTTPStatus.OK),
+    ('users:login', 'auth_client', HTTPStatus.OK),
+    ('users:logout', 'auth_client', HTTPStatus.OK),
+    ('users:signup', 'auth_client', HTTPStatus.OK),
+    ('news:edit', 'auth_client', HTTPStatus.NOT_FOUND),
+    ('news:delete', 'auth_client', HTTPStatus.NOT_FOUND),
+])
+def test_pages_availability(
     url,
     client_fixture,
     expected_status,
-    request,
-    author,
-    not_author,
-    comment_edit_url,
-    comment_delete_url
+    news,
+    request
 ):
-    url = request.getfixturevalue(url)
     client = request.getfixturevalue(client_fixture)
+    if url in ('news:detail', 'news:edit', 'news:delete'):
+        response = client.get(reverse(url, args=(news.id,)))
+    else:
+        response = client.get(reverse(url))
+    assert response.status_code == expected_status
 
-    users = [author, not_author]
-    statuses = [HTTPStatus.OK, HTTPStatus.NOT_FOUND]
-
-    for user, status in zip(users, statuses):
-        client.force_login(user)
-        for comment_url in (comment_edit_url, comment_delete_url):
-            assert client.get(comment_url).status_code == status
-
-    response = client.get(url)
-    assert response.status_code == expected_status.value
+@pytest.mark.parametrize('url, client_fixture, expected_redirect', [
+    ('news:edit', 'client', True),
+    ('news:delete', 'client', True),
+])
+def test_redirect_for_anonymous_client(
+    url,
+    client_fixture,
+    login_url,
+    expected_redirect,
+    comment,
+    request
+):
+    client = request.getfixturevalue(client_fixture)
+    url = reverse(url, args=(comment.id,))
+    redirect_url = f'{login_url}?next={url}'
+    response = client.get(url, follow=True)
+    assert response.redirect_chain[0][0] == redirect_url

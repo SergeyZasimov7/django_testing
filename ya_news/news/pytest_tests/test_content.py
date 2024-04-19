@@ -17,7 +17,7 @@ def test_news_order(client, home_url):
     assert all_dates == sorted(all_dates, reverse=True)
 
 
-def test_comments_order(client, detail_url):
+def test_comments_order(client, detail_url, ten_comments):
     response = client.get(detail_url)
     all_comments = response.context['news'].comment_set.all()
     all_timestamps = [comment.created for comment in all_comments]

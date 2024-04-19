@@ -103,3 +103,16 @@ def comment_edit_redirect_url(login_url, comment_edit_url):
 @pytest.fixture
 def comment_delete_redirect_url(login_url, comment_delete_url):
     return f'{login_url}?next={comment_delete_url}'
+
+
+@pytest.fixture
+def ten_comments(news, author):
+    comments = []
+    for _ in range(10):
+        comment = Comment.objects.create(
+            news=news,
+            author=author,
+            text='Текст комментария'
+        )
+        comments.append(comment)
+    return comments
