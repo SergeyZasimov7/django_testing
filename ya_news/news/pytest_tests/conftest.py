@@ -4,6 +4,7 @@ import pytest
 from django.conf import settings
 from django.urls import reverse
 from django.test import Client
+from django.utils import timezone
 
 from news.models import News, Comment
 
@@ -106,13 +107,12 @@ def comment_delete_redirect_url(login_url, comment_delete_url):
 
 
 @pytest.fixture
-def ten_comments(news, author):
-    comments = []
-    for _ in range(10):
+def comments(news, author):
+    base_time = timezone.now() - timedelta(days=10)
+    for i in range(10):
         comment = Comment.objects.create(
             news=news,
             author=author,
-            text='Текст комментария'
+            text='Текст комментария',
+            created=base_time + timedelta(hours=i)
         )
-        comments.append(comment)
-    return comments

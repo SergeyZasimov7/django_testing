@@ -18,7 +18,7 @@ class TestContent(BaseTestCase):
         return {**self.form_data, **kwargs}
 
     def test_not_unique_slug(self):
-        initial_note_count = Note.objects.count()
+        initial_note_count = Note.objects.get(slug=self.note.slug)
         response = self.author_client.post(ADD_URL, data={
             **self.form_data,
             'slug': self.note.slug
@@ -29,7 +29,7 @@ class TestContent(BaseTestCase):
             'slug',
             errors=(self.note.slug + WARNING)
         )
-        self.assertEqual(initial_note_count, Note.objects.count())
+        self.assertEqual(initial_note_count, Note.objects.get(slug=self.note.slug))
 
     def test_create_note_with_full_form_data(self):
         Note.objects.all().delete()
@@ -61,7 +61,7 @@ class TestContent(BaseTestCase):
         self.assertEqual(self.note.title, form_data['title'])
         self.assertEqual(self.note.text, form_data['text'])
         self.assertEqual(self.note.slug, form_data['slug'])
-        self.assertEqual(Note.objects.get(pk=self.note.pk).author, self.author)
+        self.assertEqual(self.note.author, self.author)
 
     def test_other_user_cant_edit_note(self):
         original_title, original_text, original_slug = (
@@ -76,7 +76,7 @@ class TestContent(BaseTestCase):
         self.assertEqual(self.note.title, original_title)
         self.assertEqual(self.note.text, original_text)
         self.assertEqual(self.note.slug, original_slug)
-        self.assertEqual(Note.objects.get(pk=self.note.pk).author, self.author)
+        self.assertEqual(self.note.author, self.author)
 
     def test_author_can_delete_note(self):
         response = self.author_client.post(NOTE_DELETE_URL)

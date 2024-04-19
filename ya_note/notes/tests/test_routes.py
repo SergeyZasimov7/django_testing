@@ -27,8 +27,10 @@ class TestContent(BaseTestCase):
 
         for url, client, expected_status in cases:
             with self.subTest(url=url):
-                response = client.get(url, follow_redirects=True)
-                self.assertEqual(response.status_code, expected_status)
+                self.assertEqual(
+                    client.get(url, follow_redirects=True).status_code,
+                    expected_status
+                )
 
     def test_redirect_for_anonymous_client(self):
         urls_without_slug = [ADD_URL, LIST_URL, SUCCESS_URL]

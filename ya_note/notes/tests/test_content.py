@@ -4,7 +4,7 @@ from .test_cases import BaseTestCase, LIST_URL, ADD_URL, NOTE_EDIT_URL
 
 class TestContent(BaseTestCase):
 
-    def test_forms_passed_to_create_and_edit_notes_page(self):
+    def test_forms_passed_to_create_and_edit_notes_pages(self):
         for url in [ADD_URL, NOTE_EDIT_URL]:
             with self.subTest(url=url):
                 response = self.author_client.get(url)
