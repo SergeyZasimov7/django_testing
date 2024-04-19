@@ -1,26 +1,31 @@
 import pytest
 from http import HTTPStatus
 
-@pytest.mark.parametrize('url, client_fixture, expected_redirect, expected_status', [
-    (pytest.lazy_fixture('home_url'), 'auth_client', False, HTTPStatus.OK),
-    (pytest.lazy_fixture('detail_url'), 'auth_client', False, HTTPStatus.OK),
-    (pytest.lazy_fixture('login_url'), 'auth_client', False, HTTPStatus.OK),
-    (pytest.lazy_fixture('logout_url'), 'auth_client', False, HTTPStatus.OK),
-    (pytest.lazy_fixture('signup_url'), 'auth_client', False, HTTPStatus.OK),
-    (
-     pytest.lazy_fixture('comment_edit_url'),
-     'auth_client',
-     False,
-     HTTPStatus.OK
-     ),
-    (
-     pytest.lazy_fixture('comment_delete_url'),
-     'auth_client',
-     False,
-     HTTPStatus.OK
-     ),
-    (pytest.lazy_fixture('comment_edit_url'), 'client', True, HTTPStatus.OK),
-    (pytest.lazy_fixture('comment_delete_url'), 'client', True, HTTPStatus.OK),
+@pytest.mark.parametrize(
+    'url, 
+    client_fixture,
+    expected_redirect,
+    expected_status',
+    [
+        (pytest.lazy_fixture('home_url'), 'auth_client', False, HTTPStatus.OK),
+        (pytest.lazy_fixture('detail_url'), 'auth_client', False, HTTPStatus.OK),
+        (pytest.lazy_fixture('login_url'), 'auth_client', False, HTTPStatus.OK),
+        (pytest.lazy_fixture('logout_url'), 'auth_client', False, HTTPStatus.OK),
+        (pytest.lazy_fixture('signup_url'), 'auth_client', False, HTTPStatus.OK),
+        (
+        pytest.lazy_fixture('comment_edit_url'),
+        'auth_client',
+        False,
+        HTTPStatus.OK
+        ),
+        (
+        pytest.lazy_fixture('comment_delete_url'),
+        'auth_client',
+        False,
+        HTTPStatus.OK
+        ),
+        (pytest.lazy_fixture('comment_edit_url'), 'client', True, HTTPStatus.OK),
+        (pytest.lazy_fixture('comment_delete_url'), 'client', True, HTTPStatus.OK),
 ])
 def test_page_availability_and_redirect(url,
     client_fixture,

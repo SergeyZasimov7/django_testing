@@ -33,6 +33,18 @@ class TestContent(BaseTestCase):
             initial_note_count,
             Note.objects.filter(slug=self.note.slug).count()
         )
+        self.assertEqual(
+            self.note.title,
+            Note.objects.get(slug=self.note.slug).title
+        )
+        self.assertEqual(
+            self.note.text,
+            Note.objects.get(slug=self.note.slug).text
+        )
+        self.assertEqual(
+            self.note.author,
+            Note.objects.get(slug=self.note.slug).author
+        )
 
     def test_create_note_with_full_form_data(self):
         Note.objects.all().delete()
