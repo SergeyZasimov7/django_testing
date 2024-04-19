@@ -18,7 +18,7 @@ class TestContent(BaseTestCase):
         return {**self.form_data, **kwargs}
 
     def test_not_unique_slug(self):
-        initial_note_count = Note.objects.get(slug=self.note.slug)
+        initial_note_count = Note.objects.filter(slug=self.note.slug).count()
         response = self.author_client.post(ADD_URL, data={
             **self.form_data,
             'slug': self.note.slug
@@ -31,7 +31,7 @@ class TestContent(BaseTestCase):
         )
         self.assertEqual(
             initial_note_count,
-            Note.objects.get(slug=self.note.slug)
+            Note.objects.filter(slug=self.note.slug).count()
         )
 
     def test_create_note_with_full_form_data(self):
@@ -39,47 +39,44 @@ class TestContent(BaseTestCase):
         response = self.author_client.post(ADD_URL, data=self.form_data)
         self.assertRedirects(response, SUCCESS_URL)
         self.assertEqual(Note.objects.count(), 1)
-        new_note = Note.objects.get(slug=self.form_data.get('slug', None))
+        new_note = Note.objects.latest('id')
         self.assertEqual(new_note.title, self.form_data['title'])
         self.assertEqual(new_note.text, self.form_data['text'])
         self.assertEqual(new_note.slug, self.form_data['slug'])
         self.assertEqual(new_note.author, self.author)
 
-    def test_create_note_with_slug(self):
+    def test_create_note_with_empty_slug(self):
         Note.objects.all().delete()
-        response = self.author_client.post(ADD_URL, data=self.form_data)
-        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        form_data = self.form_data.copy()
+        form_data['slug'] = ''
+        response = self.author_client.post(ADD_URL, data=form_data)
+        self.assertRedirects(response, SUCCESS_URL)
         self.assertEqual(Note.objects.count(), 1)
-        new_note = Note.objects.get()
-        self.assertEqual(new_note.title, self.form_data['title'])
-        self.assertEqual(new_note.text, self.form_data['text'])
-        self.assertEqual(new_note.slug, self.form_data['slug'])
+        new_note = Note.objects.first()
+        self.assertEqual(new_note.title, form_data['title'])
+        self.assertEqual(new_note.text, form_data['text'])
+        self.assertIsNotNone(new_note.slug)
         self.assertEqual(new_note.author, self.author)
 
     def test_author_can_edit_note(self):
         form_data = self.get_updated_form_data(slug='edited-slug')
         response = self.author_client.post(NOTE_EDIT_URL, form_data)
         self.assertRedirects(response, SUCCESS_URL)
-        self.note = Note.objects.get(pk=self.note.pk)
-        self.assertEqual(self.note.title, form_data['title'])
-        self.assertEqual(self.note.text, form_data['text'])
-        self.assertEqual(self.note.slug, form_data['slug'])
-        self.assertEqual(self.note.author, self.author)
+        note = Note.objects.get(pk=self.note.pk)
+        self.assertEqual(note.title, form_data['title'])
+        self.assertEqual(note.text, form_data['text'])
+        self.assertEqual(note.slug, form_data['slug'])
+        self.assertEqual(note.author, self.author)
 
     def test_other_user_cant_edit_note(self):
-        original_title, original_text, original_slug = (
-            self.note.title,
-            self.note.text,
-            self.note.slug
-        )
         form_data = self.get_updated_form_data(slug='edited-slug')
         response = self.not_author_client.post(NOTE_EDIT_URL, form_data)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
-        self.note = Note.objects.get(pk=self.note.pk)
-        self.assertEqual(self.note.title, original_title)
-        self.assertEqual(self.note.text, original_text)
-        self.assertEqual(self.note.slug, original_slug)
-        self.assertEqual(self.note.author, self.author)
+        note = Note.objects.get(pk=self.note.pk)
+        self.assertEqual(note.title, self.note.title)
+        self.assertEqual(note.text, self.note.text)
+        self.assertEqual(note.slug, self.note.slug)
+        self.assertEqual(note.author, self.author)
 
     def test_author_can_delete_note(self):
         response = self.author_client.post(NOTE_DELETE_URL)

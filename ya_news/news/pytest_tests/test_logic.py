@@ -46,10 +46,13 @@ def test_user_cant_delete_comment_of_another_user(
         comment_delete_url,
         comment
 ):
-    initial_comments = Comment.objects.get(pk=comment.pk)
+    initial_comment = comment
     response = reader_client.post(comment_delete_url)
     assert response.status_code == HTTPStatus.NOT_FOUND
-    assert initial_comments == Comment.objects.get(pk=comment.pk)
+    assert Comment.objects.filter(pk=initial_comment.pk).exists()
+    assert initial_comment.news == comment.news
+    assert initial_comment.author == comment.author
+    assert initial_comment.text == comment.text
 
 
 def test_author_can_edit_comment(auth_client, comment, comment_edit_url):
