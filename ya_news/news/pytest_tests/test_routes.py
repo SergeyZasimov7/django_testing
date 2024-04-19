@@ -27,6 +27,7 @@ def test_pages_availability(
         response = client.get(reverse(url))
     assert response.status_code == expected_status
 
+
 @pytest.mark.parametrize('url, client_fixture, expected_redirect', [
     ('news:edit', 'client', True),
     ('news:delete', 'client', True),
