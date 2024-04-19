@@ -2,7 +2,7 @@ import pytest
 from http import HTTPStatus
 
 @pytest.mark.parametrize(
-    'url, 
+    'url,
     client_fixture,
     expected_redirect,
     expected_status',
