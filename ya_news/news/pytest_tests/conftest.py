@@ -110,7 +110,7 @@ def comment_delete_redirect_url(login_url, comment_delete_url):
 def comments(news, author):
     base_time = timezone.now() - timedelta(days=10)
     for i in range(10):
-        comment = Comment.objects.create(
+        Comment.objects.create(
             news=news,
             author=author,
             text='Текст комментария',

@@ -29,7 +29,10 @@ class TestContent(BaseTestCase):
             'slug',
             errors=(self.note.slug + WARNING)
         )
-        self.assertEqual(initial_note_count, Note.objects.get(slug=self.note.slug))
+        self.assertEqual(
+            initial_note_count,
+            Note.objects.get(slug=self.note.slug)
+        )
 
     def test_create_note_with_full_form_data(self):
         Note.objects.all().delete()

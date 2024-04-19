@@ -1,5 +1,4 @@
 import pytest
-from django.urls import reverse
 from http import HTTPStatus
 
 
@@ -25,6 +24,7 @@ def test_pages_availability(
     else:
         response = client.get(url)
     assert response.status_code == expected_status
+
 
 @pytest.mark.parametrize('url, client_fixture, expected_redirect', [
     (pytest.lazy_fixture('comment_edit_url'), 'client', True),
